@@ -1,11 +1,13 @@
 '''
 # 21. 07. 27
 '''
+from eunjeon import Mecab
+from konlpy.tag import Okt
 
 def textPreprocessing(txt, method="mecab", stopword=[]):
     temp = []
     if method == "mecab":
-        from eunjeon import Mecab
+        
         mecab = Mecab()
         txt = mecab.pos(txt)
 
@@ -16,7 +18,7 @@ def textPreprocessing(txt, method="mecab", stopword=[]):
                 temp.append(txt.index(i))
 
     elif method == "okt":
-        from konlpy.tag import Okt
+        
         okt = Okt()
         txt = okt.normalize(txt)
 
@@ -54,9 +56,7 @@ def getStopWords():
     stopword_filename = "stopwords"
     with open(stopword_filename+'.txt', 'rt', encoding="utf-8") as f:
         stopword = f.readlines()
-
-    # stopword_list = [ line.strip('\n') for line in stopword ]
-    
+        
     return [ line.strip('\n') for line in stopword ] # stopword_list
 
 

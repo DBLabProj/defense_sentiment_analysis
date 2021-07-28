@@ -1,5 +1,5 @@
 '''
-# 21. 07. 27
+# 21. 07. 28
 '''
 from eunjeon import Mecab
 from konlpy.tag import Okt
@@ -7,7 +7,6 @@ from konlpy.tag import Okt
 def textPreprocessing(txt, method="mecab", stopword=[]):
     temp = []
     if method == "mecab":
-        
         mecab = Mecab()
         txt = mecab.pos(txt)
 
@@ -18,7 +17,6 @@ def textPreprocessing(txt, method="mecab", stopword=[]):
                 temp.append(txt.index(i))
 
     elif method == "okt":
-        
         okt = Okt()
         txt = okt.normalize(txt)
 
@@ -27,18 +25,7 @@ def textPreprocessing(txt, method="mecab", stopword=[]):
         for i in txt:
             if i[1] == "Josa" or i[1] == "Number" or i[1] == "Punctuation":
                 temp.append(txt.index(i))
-    '''
-    for i in txt:
-        if method == "mecab":
-            if i[1][0] == "J" or i[1][0] == "S":
-                if i[1] == "SL":
-                    continue
-                temp.append(txt.index(i))
-        
-        elif method == "okt":
-            if i[1] == "Josa" or i[1] == "Number" or i[1] == "Punctuation":
-                temp.append(txt.index(i))
-    '''
+    
     temp.reverse()
 
     for i in temp:
@@ -62,8 +49,8 @@ def getStopWords():
 
 
 if __name__ == "__main__":
-    txt = "애플워치를 너무 사고싶다!!"
+    txt = "나는 애플워치랑 아이패드를 너무 사고싶다....!!"
     stword = getStopWords()
-    print( "1.", textPreprocessing(txt, method="mecab", stopword=stword) )
-    print( "2.", textPreprocessing(txt, method="okt", stopword=stword) )
+    print( "1. mecab :", textPreprocessing(txt, method="mecab", stopword=stword) )
+    print( "2. okt :", textPreprocessing(txt, method="okt", stopword=stword) )
     pass

@@ -2,7 +2,7 @@
 # 21. 07. 28
 '''
 from eunjeon import Mecab
-# from konlpy.tag import Okt
+from konlpy.tag import Okt
 
 def textPreprocessing(txt, method="mecab", stopword=[]):
     temp = []

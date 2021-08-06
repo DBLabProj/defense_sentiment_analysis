@@ -110,8 +110,8 @@ def build_model(train_data): # to make rnn model
 
     # apply l2 regularizer
     for _ in range(5):
-        model.add(Dense(32, activation="relu"  ))#, kernel_regularizer= regularizers.l2(0.001)))  #
-        model.add(Dropout(dropout_val))
+        model.add(Dense(32, activation="relu" , kernel_regularizer= regularizers.l2(0.001)))  # ))#
+        #model.add(Dropout(dropout_val))
     
     model.add(Dense(32, activation="relu"))
     model.add(Dense(1, activation="sigmoid"))
@@ -126,18 +126,17 @@ rnn_model.compile( # rnn model compile
 
 # model training
 history = rnn_model.fit(x_train, y_train, 
-                   epochs = 20,  
-                   batch_size = 32 , 
+                   epochs = 10,  
+                   batch_size = 16 ,
                    validation_data = (x_test, y_test) 
                    )
 rnn_model.summary()
-showModelTrain(history)
-
 
 model_save_path = "./model_save/tf_model/" # model save path
-model_name ="model+labeling+naver" #model save file name
+model_name ="model+labeling+nave+case4r" #model save file name
 tf.saved_model.save(rnn_model, model_save_path+model_name)
 
+showModelTrain(history)
 
 '''
 # [종교 감성 분석 결과는] deep learning model train result
@@ -149,4 +148,7 @@ tf.saved_model.save(rnn_model, model_save_path+model_name)
 
 # [주한미군 감성 분석 3 + 레이블링 추가 결과는] deep learning model train result
 loss: 0.1340 - accuracy: 0.9606 - val_loss: 0.5863 - val_accuracy: 0.8016
+
+# [주한미군 감성 분석 4 + 레이블링 추가 결과는] deep learning model train result
+loss: 0.1936 - accuracy: 0.9382 - val_loss: 0.4790 - val_accuracy: 0.7986
 '''

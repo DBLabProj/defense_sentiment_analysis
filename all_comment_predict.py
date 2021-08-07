@@ -5,10 +5,12 @@
 from tensorflow.keras import models
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 import tensorflow as tf
-import json
-import os
+import json, os
+from tqdm import tqdm
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] ='2'
 
+'''
 tlist = [] # database table name list
 for i in range(1,6):
     t = "daum"
@@ -18,26 +20,32 @@ for i in range(1,6):
     t = "naver"
     tlist.append(t+"after"+str(i))
     tlist.append(t+"before"+str(i))
+'''
 
 # load RNN model
-rnn_model = tf.keras.models.load_model("./tf_model/rnn-model", custom_objects={"TextVectorization":TextVectorization})
+model_name = "model+labeling+nave+case5"
+rnn_model = tf.keras.models.load_model(
+    "./model_save/tf_model/"+ model_name, 
+    custom_objects={"TextVectorization":TextVectorization}
+    )
 
-path = "./json-okt-comment/" # comment  json file directory path
-for tablename in tlist:
-    if "daum" in tablename: continue
-    with open(path+tablename+'-dict.json', encoding="utf-8") as json_file:
-        data = json.load(json_file) # load json file
+path = "./data/" # comment  json file directory path
+jsonfile = "news_usarmy_all_20200601_20210601"
+
+with open(path+jsonfile+'.json', encoding="utf-8") as json_file:
+    data = json.load(json_file) # load json file
+
+for date in tqdm( data.keys() ): 
     
-    for date in data.keys(): 
-        print(date,"/",tablename)
-        
-        day_article = data[date]
-        for article in day_article.keys():
-            for comment in day_article[article][0]:
-                if comment=="": # if comment is not include text
-                    continue
-                emotion = float(rnn_model.predict([comment])) # predict comment sentiment
-                data[date][article][-1].append(round(emotion, 4)) # dictionary value append sentiment
-    result_path = "./predict-comment-tf/" #  result save json path
-    with open(result_path+"finish-"+tablename+"-dict.json", "w", encoding="utf-8") as json_file:
-        json.dump(data, json_file, indent="\t",ensure_ascii = False)
+    day_article = data[date]
+    for article in day_article.keys():
+        for comment in day_article[article]['comments']:
+            if comment=="": # if comment is not include text
+                continue
+            emotion = float(rnn_model.predict([comment])) # predict comment sentiment
+            data[date][article]['emotions'].append(round(emotion, 4)) # dictionary value append sentiment
+
+result_path = "./predict-data/tf/" #  result save json path
+result_json = "tf_predict_data"
+with open(result_path+result_json+".json", "wt", encoding="utf-8") as json_file:
+    json.dump(data, json_file, indent="\t", ensure_ascii = False)

@@ -109,9 +109,9 @@ def build_model(train_data): # to make rnn model
     model.add(Flatten())
 
     # apply l2 regularizer
-    for _ in range(5):
-        model.add(Dense(32, activation="relu" , kernel_regularizer= regularizers.l2(0.001)))  # ))#
-        #model.add(Dropout(dropout_val))
+    for _ in range(3):
+        model.add(Dense(32, activation="relu"  ))#, kernel_regularizer= regularizers.l2(0.001)))  #
+        model.add(Dropout(dropout_val))
     
     model.add(Dense(32, activation="relu"))
     model.add(Dense(1, activation="sigmoid"))
@@ -126,14 +126,14 @@ rnn_model.compile( # rnn model compile
 
 # model training
 history = rnn_model.fit(x_train, y_train, 
-                   epochs = 10,  
+                   epochs = 6,  
                    batch_size = 16 ,
                    validation_data = (x_test, y_test) 
                    )
 rnn_model.summary()
 
 model_save_path = "./model_save/tf_model/" # model save path
-model_name ="model+labeling+nave+case4r" #model save file name
+model_name ="model+labeling+nave+case5" #model save file name
 tf.saved_model.save(rnn_model, model_save_path+model_name)
 
 showModelTrain(history)
@@ -145,10 +145,12 @@ showModelTrain(history)
 # [주한미군 감성 분석 1 결과는] deep learning model train result
 # loss: 0.1347 - accuracy: 0.9588 - val_loss: 0.5813 - val_accuracy: 0.7909
 
-
 # [주한미군 감성 분석 3 + 레이블링 추가 결과는] deep learning model train result
 loss: 0.1340 - accuracy: 0.9606 - val_loss: 0.5863 - val_accuracy: 0.8016
 
 # [주한미군 감성 분석 4 + 레이블링 추가 결과는] deep learning model train result
 loss: 0.1936 - accuracy: 0.9382 - val_loss: 0.4790 - val_accuracy: 0.7986
+
+# [주한미군 감성 분석 5 + 레이블링 추가 결과는] deep learning model train result
+loss: 0.1513 - accuracy: 0.9387 - val_loss: 0.4387 - val_accuracy: 0.8163
 '''

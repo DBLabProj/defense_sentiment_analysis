@@ -7,6 +7,7 @@ from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 import tensorflow as tf
 import json, os
 from tqdm import tqdm
+from preprocessing.text_preprocessing import *
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] ='2'
 
@@ -35,15 +36,19 @@ jsonfile = "news_usarmy_all_20200601_20210601"
 with open(path+jsonfile+'.json', encoding="utf-8") as json_file:
     data = json.load(json_file) # load json file
 
-for date in tqdm( data.keys() ): 
-    
+all = len( data )
+for idx, date in  enumerate( data.keys() ): 
+    if idx % 50 ==0: print(idx ,"/", all)
     day_article = data[date]
     for article in day_article.keys():
         for comment in day_article[article]['comments']:
             if comment=="": # if comment is not include text
                 continue
-            emotion = float(rnn_model.predict([comment])) # predict comment sentiment
-            data[date][article]['emotions'].append(round(emotion, 4)) # dictionary value append sentiment
+            #print(comment.replace('\n',' ').replace('\r',' '))
+            preprocessedData = textPreprocessing(comment.replace('\n',' ').replace('\r',' '), method="mecab", stopword=[])
+            #print(preprocessedData)
+            emotion = float(rnn_model.predict([preprocessedData])) # predict comment sentiment
+            data[date][article]['emotions'].append(round(emotion, 3)) # dictionary value append sentiment
 
 result_path = "./predict-data/tf/" #  result save json path
 result_json = "tf_predict_data"

@@ -23,6 +23,8 @@ for i in range(1,6):
     tlist.append(t+"before"+str(i))
 '''
 
+
+
 # load RNN model
 model_name = "model+labeling+nave+case5"
 rnn_model = tf.keras.models.load_model(
@@ -38,7 +40,7 @@ with open(path+jsonfile+'.json', encoding="utf-8") as json_file:
 
 all = len( data )
 for idx, date in  enumerate( data.keys() ): 
-    if idx % 50 ==0: print(idx ,"/", all)
+    if idx % 30 ==0: print(idx ,"/", all)
     day_article = data[date]
     for article in day_article.keys():
         for comment in day_article[article]['comments']:
@@ -50,7 +52,7 @@ for idx, date in  enumerate( data.keys() ):
             emotion = float(rnn_model.predict([preprocessedData])) # predict comment sentiment
             data[date][article]['emotions'].append(round(emotion, 3)) # dictionary value append sentiment
 
-result_path = "./predict-data/tf/" #  result save json path
+result_path = "./data/predict-data/tf/" #  result save json path
 result_json = "tf_predict_data"
 with open(result_path+result_json+".json", "wt", encoding="utf-8") as json_file:
     json.dump(data, json_file, indent="\t", ensure_ascii = False)

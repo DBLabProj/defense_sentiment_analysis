@@ -25,7 +25,6 @@ def rewrite(filename):
 import glob
 result = ""
 for filename in glob.glob(".\\*.tsv"):
-    if "set" in filename: continue
     result += rewrite(filename)
 
 with open("dataset_2000.tsv", "wt", encoding="utf-8") as f:

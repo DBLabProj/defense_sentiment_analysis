@@ -1,12 +1,12 @@
 ﻿
 # 학습 데이터를 통해 RNN 딥러닝 모델 생성
 # build RNN model from train data
-# 21.06.29
+# 21.08.11
 
 import json
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] ='2'
-
+from text_preprocessing.text_preprocessing import *
 import numpy as np
 from tensorflow.keras import models, layers, optimizers, losses, metrics
 import tensorflow as tf
@@ -50,45 +50,25 @@ x, y = [],[]
 path = "./data/mecab/labeling/"
 filename = "dataset.tsv" # train data 
 with open(path +filename, "rt", encoding="utf-8") as f:
-    for l in f.readlines():
+    for idx, l in enumerate( f.readlines() ):
         line = l.strip("\n")
-        data, value = line.split("\t")
+        try:
+            data, value = line.strip('\t').split("\t")
+        except:
+            print(idx, line)
+        
         value = float(value)
 
-        x.append(data)
+        preprocessedData = textPreprocessing(
+                                    data.replace('\n',' ').replace('\r',' '), 
+                                    method="mecab", 
+                                    stopword=[])
+        x.append(preprocessedData)
         y.append(value)
 
-# 네이버 영화 리뷰 데이터
-filename2 = "naver-ratings-mecab.tsv"
-x2, y2 = [],[]
-# f = open(path +filename2, 'rt', encoding='utf-8') #
-# read = csv.reader(f)
-# for line in read:
-#     emotion = float(line[-1])
-#     y2.append(emotion)
-#     x2.append(line[0])
-    
-# f.close()
-with open(path +filename2, "rt", encoding="utf-8") as f:
-    for l in f.readlines():
-        line = l.strip("\n")
-        data, value = line.split("\t")
-        value = float(value)
-
-        x2.append(data)
-        y2.append(value)
-
-test_percent = 0.3 # test data percent
+test_percent = 0.1 # test data percent
 # make train and test data usin train_test_split
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
-
-# 네이버 영화 데이터 추가
-a,b,c,d =  train_test_split(x2, y2, test_size=test_percent)
-x_train += a
-x_test += b
-y_train += c
-y_test += d
-
 
 def build_model(train_data): # to make rnn model
     train_data = tf.data.Dataset.from_tensor_slices(train_data)
@@ -108,8 +88,8 @@ def build_model(train_data): # to make rnn model
     model.add(layers.Embedding(max_tokens + 1, output_dim= 200))
     model.add(Flatten())
 
-    # apply l2 regularizer
-    for _ in range(3):
+    # apply dropout
+    for _ in range(8):
         model.add(Dense(32, activation="relu"  ))#, kernel_regularizer= regularizers.l2(0.001)))  #
         model.add(Dropout(dropout_val))
     
@@ -126,31 +106,20 @@ rnn_model.compile( # rnn model compile
 
 # model training
 history = rnn_model.fit(x_train, y_train, 
-                   epochs = 6,  
-                   batch_size = 16 ,
+                   epochs = 20,
+                   batch_size = 32 ,
                    validation_data = (x_test, y_test) 
                    )
 rnn_model.summary()
 
 model_save_path = "./model_save/tf_model/" # model save path
-model_name ="model+labeling+nave+case5" #model save file name
+model_name ="volunteer_model_5" #model save file name
 tf.saved_model.save(rnn_model, model_save_path+model_name)
 
 showModelTrain(history)
 
 '''
-# [종교 감성 분석 결과는] deep learning model train result
-# loss: 0.1593 - accuracy: 0.9512 - val_loss: 0.4939 - val_accuracy: 0.8301
+[volunteer_model_5] model performance
+loss: 0.0476 - accuracy: 0.9765 - val_loss: 0.1429 - val_accuracy: 0.9553
 
-# [주한미군 감성 분석 1 결과는] deep learning model train result
-# loss: 0.1347 - accuracy: 0.9588 - val_loss: 0.5813 - val_accuracy: 0.7909
-
-# [주한미군 감성 분석 3 + 레이블링 추가 결과는] deep learning model train result
-loss: 0.1340 - accuracy: 0.9606 - val_loss: 0.5863 - val_accuracy: 0.8016
-
-# [주한미군 감성 분석 4 + 레이블링 추가 결과는] deep learning model train result
-loss: 0.1936 - accuracy: 0.9382 - val_loss: 0.4790 - val_accuracy: 0.7986
-
-# [주한미군 감성 분석 5 + 레이블링 추가 결과는] deep learning model train result
-loss: 0.1513 - accuracy: 0.9387 - val_loss: 0.4387 - val_accuracy: 0.8163
 '''

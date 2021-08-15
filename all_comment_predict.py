@@ -7,34 +7,20 @@ from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 import tensorflow as tf
 import json, os
 from tqdm import tqdm
-from preprocessing.text_preprocessing import *
+from text_preprocessing.text_preprocessing import *
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] ='2'
 
-'''
-tlist = [] # database table name list
-for i in range(1,6):
-    t = "daum"
-    tlist.append(t+"after"+str(i))
-    tlist.append(t+"before"+str(i))
-for i in range(1,6):
-    t = "naver"
-    tlist.append(t+"after"+str(i))
-    tlist.append(t+"before"+str(i))
-'''
-
-
 
 # load RNN model
-model_name = "model+labeling+nave+case5"
+model_name = "volunteer_model_5"
 rnn_model = tf.keras.models.load_model(
     "./model_save/tf_model/"+ model_name, 
     custom_objects={"TextVectorization":TextVectorization}
     )
 
 path = "./data/" # comment  json file directory path
-jsonfile = "news_usarmy_all_20200601_20210601"
-
+jsonfile = "volunteer_all"
 with open(path+jsonfile+'.json', encoding="utf-8") as json_file:
     data = json.load(json_file) # load json file
 
@@ -46,13 +32,14 @@ for idx, date in  enumerate( data.keys() ):
         for comment in day_article[article]['comments']:
             if comment=="": # if comment is not include text
                 continue
-            #print(comment.replace('\n',' ').replace('\r',' '))
-            preprocessedData = textPreprocessing(comment.replace('\n',' ').replace('\r',' '), method="mecab", stopword=[])
-            #print(preprocessedData)
+            preprocessedData = textPreprocessing(comment.replace('\n',' ').replace('\r',' '),
+                                                 method="mecab", stopword=[])
+            
             emotion = float(rnn_model.predict([preprocessedData])) # predict comment sentiment
-            data[date][article]['emotions'].append(round(emotion, 3)) # dictionary value append sentiment
+            emotion = 0 if emotion<0.5 else 1
+            data[date][article]['emotions'].append( emotion )
 
 result_path = "./data/predict-data/tf/" #  result save json path
-result_json = "tf_predict_data"
+result_json = "tf_predict_volunteer_all_3"
 with open(result_path+result_json+".json", "wt", encoding="utf-8") as json_file:
     json.dump(data, json_file, indent="\t", ensure_ascii = False)

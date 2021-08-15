@@ -28,13 +28,13 @@ def seperateJson(dirpath, json_name, date_point): # date_point likes "2020/11/05
 
 
 if __name__ == "__main__":
-    dirpath = "./predict-data/tf/"
-    json_name = "tf_predict_data"
-    check_point = "2020/12/14"
+    dirpath = "./predict-data/kobert/"
+    json_name = "kobert_predict_volunteer_all"
+    check_point = "2020/01/01"
     before, after = seperateJson(dirpath, json_name, check_point)
 
     result_path = "./predict-data/tf/" #  result save json path
-    before_name, after_name = "tf_predict_data_before", "tf_predict_data_after"
+    before_name, after_name = json_name+"_before", json_name+"_after"
     with open(result_path+before_name+".json", "wt", encoding="utf-8") as json_file:
         json.dump(before, json_file, indent="\t", ensure_ascii = False)
 

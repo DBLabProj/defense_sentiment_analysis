@@ -48,7 +48,7 @@ def showModelTrain(history):
 # 수작업 데이터
 x, y = [],[]
 path = "./data/mecab/labeling/"
-filename = "dataset.tsv" # train data 
+filename = "non_mecab_dataset.tsv" # train data 
 with open(path +filename, "rt", encoding="utf-8") as f:
     for idx, l in enumerate( f.readlines() ):
         line = l.strip("\n")
@@ -58,7 +58,6 @@ with open(path +filename, "rt", encoding="utf-8") as f:
             print(idx, line)
         
         value = float(value)
-
         preprocessedData = textPreprocessing(
                                     data.replace('\n',' ').replace('\r',' '), 
                                     method="mecab", 
@@ -66,11 +65,11 @@ with open(path +filename, "rt", encoding="utf-8") as f:
         x.append(preprocessedData)
         y.append(value)
 
-test_percent = 0.1 # test data percent
+test_percent = 0.2 # test data percent
 # make train and test data usin train_test_split
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
 
-def build_model(train_data): # to make rnn model
+def build_model_origin(train_data): # to make rnn model
     train_data = tf.data.Dataset.from_tensor_slices(train_data)
     model = Sequential()
     model.add(Input(shape=(1,), dtype="string")) # input one string data (comment)
@@ -97,6 +96,38 @@ def build_model(train_data): # to make rnn model
     model.add(Dense(1, activation="sigmoid"))
     return model
 
+def build_model(train_data): # to make rnn model
+    train_data = tf.data.Dataset.from_tensor_slices(train_data)
+    model = Sequential()
+    model.add(Input(shape=(1,), dtype="string")) # input one string data (comment)
+    max_tokens = 100000 # dictionary size
+    max_len = 64 # comment to vectorize size
+    
+    vectorize_layer = TextVectorization( # make textvectorization 
+      max_tokens=max_tokens,
+      output_mode="int",
+      output_sequence_length=max_len,
+    )
+    dropout_val = 0.5 # dropout percent
+    vectorize_layer.adapt(train_data.batch(64))
+    model.add(vectorize_layer)
+    model.add(layers.Embedding(max_tokens + 1, output_dim= 200))
+    model.add(Flatten())
+
+    # apply dropout
+    # 2**8 ~ 2**1
+    for unit in range(8):
+        units = 2 ** (8-unit)
+        print("Number of units:", units)
+        model.add(Dense(units, activation="relu"  )) #, kernel_regularizer= regularizers.l2(0.001)))  #
+        if unit!=7:
+            model.add(Dropout(dropout_val))
+    
+    #model.add(Dense(32, activation="relu"))
+    model.add(Dense(1, activation="sigmoid"))
+    return model
+
+
 rnn_model =build_model(x_train)
 rnn_model.compile( # rnn model compile
         optimizer=  "adam",
@@ -113,7 +144,7 @@ history = rnn_model.fit(x_train, y_train,
 rnn_model.summary()
 
 model_save_path = "./model_save/tf_model/" # model save path
-model_name ="volunteer_model_5" #model save file name
+model_name ="volunteer_model_try_2" #model save file name
 tf.saved_model.save(rnn_model, model_save_path+model_name)
 
 showModelTrain(history)
@@ -121,5 +152,10 @@ showModelTrain(history)
 '''
 [volunteer_model_5] model performance
 loss: 0.0476 - accuracy: 0.9765 - val_loss: 0.1429 - val_accuracy: 0.9553
+
+[volunteer_model_try_1]
+loss: 0.1431 - accuracy: 0.9583 - val_loss: 0.1504 - val_accuracy: 0.9558
+
+[volunteer_model_try_2]
 
 '''

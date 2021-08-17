@@ -8,6 +8,7 @@ import math, csv, json
 
 dirname = "tf"
 keyword = "모병제-전체-try2"
+ystick_value = 0.6
 
 def append_dict(d1, d2): # dictionary + dictionary
     for d in d1.keys():
@@ -25,23 +26,25 @@ def makeCSV(tablename, y):
         wr.writerow([e])
 
 # 시간 흐름에 따른 감성 지수 그래프
-def make_graph_flow(tablename, x, y,fig, graph_title = "Sentiment Graph"):
+def make_graph_flow(tablename, x, y, fig, graph_title = "Sentiment Graph"):
     global dirname
     plt.figure(fig, figsize=(18, 5))
     font_name = font_manager.FontProperties(fname='./font/KoPubDotumMedium.ttf', size=20).get_name()
     rc('font', family=font_name)
     
-    plt.title(graph_title,fontsize=22)
+    plt.title(graph_title, fontsize=22)
     a =0
     nx=[]
     for s in range(len(x)):
         nx.append(s)
         a+=1
-    nx = np.array(nx)
+    # nx = np.array(nx)
     ny = np.array(y)
-    m, bb = np.polyfit(nx, ny, 1) # calculate trend line
-    plt.plot(nx, m*nx + bb, 'r--', color='#819FF7' , label="Trend Line")
-    plt.plot(nx, y, 'bo', color='#2E2EFE', label="Sentiments" )
+    # m, bb = np.polyfit(nx, ny, 1) # calculate trend line
+    # plt.plot(nx, m*nx + bb, 'r--', color='#819FF7' , label="Trend Line")
+    print(nx[:3])
+    print(y[:3])
+    plt.plot(nx, y, 'bo', color='#BF00FF', label="Sentiments" )
 
     # make month x label
     month_list, temp, year_temp = [], "", ''
@@ -55,7 +58,7 @@ def make_graph_flow(tablename, x, y,fig, graph_title = "Sentiment Graph"):
                 year_temp = year
         else: month_list.append("")
         
-    plt.ylim([0.0, 0.3]) 
+    plt.ylim([0.0, ystick_value]) 
     plt.xlabel('Date',fontsize=18)
     plt.ylabel('Sentiment',fontsize=18)
     plt.xticks(rotation=60,fontsize=10)
@@ -73,14 +76,18 @@ def makeValue(data):
         emotions_ = []
         for article in data[date]:
             emotions_.extend( data[date][article]['emotions'] )
-        result[date] = emotions_.count(1) / len(emotions_)
+        #긍정률 계산
+        if not emotions_: continue
+        # print( sum(emotions_),'//', len(emotions_) )
+        result[date] = sum(emotions_) / len(emotions_)
+
     
 
     x, y = [], []
     for d in result.keys():
         x.append(d)
         y.append(result[d])
-
+    
     return x, y
 
 def calc_mean_std(data):
@@ -96,7 +103,7 @@ data = []
 # 댓글 데이터 json 파일 저장 경로
 path = "./data/predict-data/" 
 json_name = "tf_volunteer_all_try_2"
-
+# json_name = "kobert_predict_volunteer_comment_data"
 with open(path+json_name+'.json', encoding="utf-8") as json_file:
     data_ = json.load(json_file)
 
@@ -104,6 +111,8 @@ x, y = makeValue(data_)
 
 print(x[:10], y[:10])
 
+# 그래프 생성
+make_graph_flow(json_name+"", x, y,  fig, graph_title = "Keras Sentiments Flow Graph (Positive rate)")
 # 감성 평균, 표준편차 text 파일 생성
 with open( "./graph/"+dirname+"/"+json_name+"_stats.txt", "at", encoding="utf-8" ) as f:
     title = keyword+" 감성 통계"
@@ -136,8 +145,6 @@ with open( "./graph/"+dirname+"/"+json_name+"year_stats.txt", "at", encoding="ut
         mean, std = calc_mean_std( year_dict[years] )
         f.write(str(years)+" : avg: "+str(mean)+" std: "+str(std)+"\n")
 
-# 그래프 생성
-make_graph_flow(json_name, x, y,  fig, graph_title = "Keras Sentiments Flow Graph v2")
 # CSV 파일 생성
-makeCSV(keyword, y)
+# makeCSV(keyword, y)
 

@@ -13,7 +13,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] ='2'
 
 
 # load RNN model
-model_name = "volunteer_model_try_2"
+model_name = "volunteer_model_try_3"
 rnn_model = tf.keras.models.load_model(
     "./model_save/tf_model/"+ model_name, 
     custom_objects={"TextVectorization":TextVectorization}
@@ -41,6 +41,6 @@ for idx, date in  enumerate( data.keys() ):
             data[date][article]['emotions'].append( emotion )
 
 result_path = "./data/predict-data/" #  result save json path
-result_json = "tf_volunteer_all_try_2"
+result_json = "tf_volunteer_all_try_3"
 with open(result_path+result_json+".json", "wt", encoding="utf-8") as json_file:
     json.dump(data, json_file, indent="\t", ensure_ascii = False)

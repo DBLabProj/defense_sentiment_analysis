@@ -65,7 +65,7 @@ with open(path +filename, "rt", encoding="utf-8") as f:
         x.append(preprocessedData)
         y.append(value)
 
-test_percent = 0.2 # test data percent
+test_percent = 0.1 # test data percent
 # make train and test data usin train_test_split
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_percent)
 
@@ -137,14 +137,14 @@ rnn_model.compile( # rnn model compile
 
 # model training
 history = rnn_model.fit(x_train, y_train, 
-                   epochs = 20,
+                   epochs = 10,
                    batch_size = 32 ,
                    validation_data = (x_test, y_test) 
                    )
 rnn_model.summary()
 
 model_save_path = "./model_save/tf_model/" # model save path
-model_name ="volunteer_model_try_2" #model save file name
+model_name ="volunteer_model_try_3" #model save file name
 tf.saved_model.save(rnn_model, model_save_path+model_name)
 
 showModelTrain(history)
@@ -157,5 +157,8 @@ loss: 0.0476 - accuracy: 0.9765 - val_loss: 0.1429 - val_accuracy: 0.9553
 loss: 0.1431 - accuracy: 0.9583 - val_loss: 0.1504 - val_accuracy: 0.9558
 
 [volunteer_model_try_2]
+loss: 0.1340 - accuracy: 0.9643 - val_loss: 0.1228 - val_accuracy: 0.9649
 
+[volunteer_model_try_3]
+loss: 0.1336 - accuracy: 0.9598 - val_loss: 0.2068 - val_accuracy: 0.9583
 '''

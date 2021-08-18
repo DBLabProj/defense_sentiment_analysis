@@ -8,7 +8,7 @@ import math, csv, json
 
 dirname = "tf"
 keyword = "모병제-전체-try2"
-ystick_value = 0.6
+ystick_value = 1.1
 
 def append_dict(d1, d2): # dictionary + dictionary
     for d in d1.keys():
@@ -80,7 +80,9 @@ def makeValue(data):
         if not emotions_: continue
         # print( sum(emotions_),'//', len(emotions_) )
         result[date] = sum(emotions_) / len(emotions_)
-
+        val = sum(emotions_) / len(emotions_)
+        if val > 0.2:
+            print('>>',date, val)
     
 
     x, y = [], []
@@ -111,8 +113,11 @@ x, y = makeValue(data_)
 
 print(x[:10], y[:10])
 
+import time
+time.sleep(1)
+
 # 그래프 생성
-make_graph_flow(json_name+"", x, y,  fig, graph_title = "Keras Sentiments Flow Graph (Positive rate)")
+make_graph_flow(json_name+"3", x, y,  fig, graph_title = "Keras Sentiments Flow Graph (Positive rate)")
 # 감성 평균, 표준편차 text 파일 생성
 with open( "./graph/"+dirname+"/"+json_name+"_stats.txt", "at", encoding="utf-8" ) as f:
     title = keyword+" 감성 통계"

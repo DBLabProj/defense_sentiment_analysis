@@ -32,10 +32,13 @@ for idx, date in  enumerate( data.keys() ):
         for comment in day_article[article]['comments']:
             if comment=="": # if comment is not include text
                 continue
+            # if preprocessed data
             preprocessedData = comment.replace('\n',' ').replace('\r',' ')
-            # preprocessedData = textPreprocessing(comment.replace('\n',' ').replace('\r',' '),
-            #                                      method="mecab", stopword=[])
-            
+            '''
+            # if not preprocessed
+            preprocessedData = textPreprocessing(comment.replace('\n',' ').replace('\r',' '),
+                                                  method="mecab", stopword=[])
+            '''
             emotion = float(rnn_model.predict([preprocessedData])) # predict comment sentiment
             emotion = 0 if emotion<0.5 else 1
             data[date][article]['emotions'].append( emotion )

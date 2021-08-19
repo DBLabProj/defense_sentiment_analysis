@@ -7,7 +7,7 @@ import numpy as np
 import math, csv, json
 
 dirname = "tf"
-keyword = "모병제-전체"
+keyword = "모병제"
 
 def append_dict(d1, d2): # dictionary + dictionary
     for d in d1.keys():
@@ -31,7 +31,7 @@ def make_graph_flow(tablename, x, y,fig, graph_title = "Sentiment Graph"):
     font_name = font_manager.FontProperties(fname='./font/KoPubDotumMedium.ttf', size=20).get_name()
     rc('font', family=font_name)
     
-    plt.title(graph_title,fontsize=22)
+    plt.title(graph_title,fontsize=25)
     a =0
     nx=[]
     for s in range(len(x)):
@@ -39,9 +39,7 @@ def make_graph_flow(tablename, x, y,fig, graph_title = "Sentiment Graph"):
         a+=1
     nx = np.array(nx)
     ny = np.array(y)
-    m, bb = np.polyfit(nx, ny, 1) # calculate trend line
-    plt.plot(nx, m*nx + bb, 'r--', color='#819FF7' , label="Trend Line")
-    plt.plot(nx, y, 'bo', color='#2E2EFE', label="Sentiments" )
+    plt.plot(nx, ny, 'bo', color='#2E2EFE', label="Sentiments" )
 
     # make month x label
     month_list, temp, year_temp = [], "", ''
@@ -54,13 +52,23 @@ def make_graph_flow(tablename, x, y,fig, graph_title = "Sentiment Graph"):
                 month_list[-1] = year+"/"+ month_list[-1]
                 year_temp = year
         else: month_list.append("")
-        
+    
+    # 홀수 월만 표시
+    mlist = [a for a in month_list]
+    month_list = []
+    for mm in mlist:
+        if mm:
+            if int(mm.split("/")[-1]) % 2 == 1:
+                month_list.append( mm )
+        else: month_list.append("")
+
     plt.ylim([0.0, 0.3]) 
     plt.xlabel('Date',fontsize=18)
     plt.ylabel('Sentiment',fontsize=18)
-    plt.xticks(rotation=60,fontsize=10)
+    plt.xticks(rotation=40,fontsize=15)
     plt.yticks(fontsize=16)
     plt.xticks(range(0,len(month_list)), month_list)
+    
     plt.legend()
     plt.savefig("./graph/"+dirname+"/"+tablename+'-emotion-flow.png', dpi=400)
     return 0
@@ -94,7 +102,7 @@ def makeValue(data):
             
             emotion_avg  =sum(emotionList) / len(emotionList) #기사당 감성 평균 / emotion average per article
             emotion += (len(emotionList)/day_emo_count) * emotion_avg # 날짜당 기사 가중 평균 / article emotion weighted average per day
-        least = 30 # 최소 댓글 수 
+        least = 108 # 최소 댓글 수 = 기사당 평균 댓글 수로 설정
         # 공식 참고 : https://www.quora.com/How-does-IMDbs-rating-system-work
         emotion_ = (day_emo_count/(day_emo_count+least))*emotion +  (least/(day_emo_count+least))*table_emo_avg 
         
@@ -122,9 +130,9 @@ avg_x, avg_y = [], []
 data = []
 
 # 댓글 데이터 json 파일 저장 경로
-path = "./data/predict-data/" + dirname + "/"
-json_name = "tf_predict_volunteer_all_3"
-
+path = "./data/predict-data/" 
+json_name = "tf_predict_volunteer_comment_data"
+json_name = "kobert_predict_volunteer_comment_data"
 with open(path+json_name+'.json', encoding="utf-8") as json_file:
     data_ = json.load(json_file)
 
@@ -141,6 +149,9 @@ with open( "./graph/"+dirname+"/"+json_name+"_stats.txt", "at", encoding="utf-8"
     f.write("avg: "+str(mean)+" std: "+str(std)+"\n")
     
     f.write("--"*10+"\n")
+
+# 그래프 생성
+make_graph_flow(json_name, x, y,  fig, graph_title = "KoBERT Sentiments Flow Graph")
 
 with open( "./graph/"+dirname+"/"+json_name+"year_stats.txt", "at", encoding="utf-8" ) as f:
     title = keyword+" 구간별 감성 통계"
@@ -165,8 +176,6 @@ with open( "./graph/"+dirname+"/"+json_name+"year_stats.txt", "at", encoding="ut
         mean, std = calc_mean_std( year_dict[years] )
         f.write(str(years)+" : avg: "+str(mean)+" std: "+str(std)+"\n")
 
-# 그래프 생성
-make_graph_flow(json_name, x, y,  fig, graph_title = "Keras Sentiments Flow Graph")
 # CSV 파일 생성
-makeCSV(keyword, y)
+# makeCSV(keyword, y)
 

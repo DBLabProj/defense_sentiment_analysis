@@ -9,4 +9,4 @@ National Defense comment data sentiment analysis
 
 📌 Main Library : KoBERT, pytorch, tensorflow, keras, KoNLPy    
 
-📌 Keyword : "KoBERT", "Sentiment Analysis", "Machine Learning", "Korean", "Deep Learning", "Volunteer Military System"   
+📌 Keyword : "KoBERT", "Sentiment Analysis", "Deep Learning", "Volunteer Military System"   
